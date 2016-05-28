@@ -1,0 +1,21 @@
+{
+"schedule":[
+{
+
+"gameId":"1001",
+"home":"Team A",
+"away":"Team B",
+"scheduledStart":"2016-05-24T16:04:19Z",
+"scheduledEnd":"2016-05-24T16:04:19Z",
+"matchStatus":"Scheduled"
+},
+{
+"gameId":"1002",
+"home":"Team C",
+"away":"Team D",
+"scheduledStart":"2016-05-24T16:04:19Z",
+"scheduledEnd":"2016-05-24T16:04:19Z",
+"matchStatus":"Scheduled"
+}
+]
+}

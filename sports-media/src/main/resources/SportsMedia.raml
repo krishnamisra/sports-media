@@ -1,0 +1,197 @@
+#%RAML 0.8
+---
+title: Sports Media Application
+version: 1.0
+baseUri: http://localhost:8888/sportsmedia
+documentation:
+  - title: Sports Media Application
+    content: |
+      This application is for sports content and media aggregation and APIs for accessing the content from a web or mobile client
+securedBy: [basic_auth]
+securitySchemes:
+    - basic_auth:
+        description: |
+            API set supports authenticating all API requests.
+        type: Basic Authentication
+        describedBy:
+            headers:
+                Authorization:
+                    description: |
+                       Basic Authentication details, e.g. Basic dXNlcjM6YWRtaW4xMjM=.
+                    type: string
+            responses:
+                401:
+                    description: |
+                        Invalid Credentials.
+                403:
+                    description: |
+                        User is not authorized to invoke API.
+/user:
+  displayName: Allows a device to register to backend using API call  
+  post:
+    description:
+      Allows a device to register to backend using API call
+    body:
+      application/json:
+      # schema: !include schemas/json/Notification.json
+    responses:
+      201:
+        body:
+          application/json:
+            schema: !include schemas/json/GenericResponse.json
+      400:
+        description:
+          The payload was badly formed or does not comply to the schema provided.
+  patch:
+    description:
+      Allows a device to update details in backend using API call
+    body:
+      application/json:
+       #schema: !include schemas/json/Notification.json
+    responses:
+      201:
+        body:
+          application/json:
+           # schema: !include schemas/json/GenericResponse.json
+      400:
+        description:
+          The payload was badly formed or does not comply to the schema provided.
+  delete:
+    description:
+      Allows a device to unregister from backend using API call
+    body:
+      application/json:
+       #schema: !include schemas/json/Notification.json
+    responses:
+      201:
+        body:
+          application/json:
+            schema: !include schemas/json/GenericResponse.json
+      400:
+        description:
+          The payload was badly formed or does not comply to the schema provided.
+  /{userId}:
+    get:
+      description:
+        Allows a device to register to backend using API call
+      body:
+        application/json:
+        # schema: !include schemas/json/Notification.json
+      responses:
+        201:
+          body:
+            application/json:
+              schema: !include schemas/json/GenericResponse.json
+        400:
+          description:
+            The payload was badly formed or does not comply to the schema provided.
+
+/sns:
+  get:
+          description:
+            Retrieves all the social networking feeds
+          body:
+            application/json:
+            # schema: !include schemas/json/Notification.json
+          responses:
+            201:
+              body:
+                application/json:
+                  schema: !include schemas/json/GenericResponse.json
+            400:
+              description:
+                The payload was badly formed or does not comply to the schema provided.
+  /twitter:
+    get:
+          description:
+            Retrieves all the twitter feeds
+          body:
+            application/json:
+            # schema: !include schemas/json/Notification.json
+          responses:
+            201:
+              body:
+                application/json:
+                  schema: !include schemas/json/GenericResponse.json
+            400:
+              description:
+                The payload was badly formed or does not comply to the schema provided.
+    /{twitterHandle}:
+       get:
+          description:
+            Retrieves feeds for a specific twitter account
+          body:
+            application/json:
+            # schema: !include schemas/json/Notification.json
+          responses:
+            201:
+              body:
+                application/json:
+                  schema: !include schemas/json/GenericResponse.json
+            400:
+              description:
+                The payload was badly formed or does not comply to the schema provided.
+/matches:
+  displayName: Retrieves all the matches  
+  get:
+    description:
+      Retrieves all the matches  
+    body:
+      application/json:
+      # schema: !include schemas/json/Notification.json
+    responses:
+      201:
+        body:
+          application/json:
+            schema: !include schemas/json/GenericResponse.json
+      400:
+        description:
+          The payload was badly formed or does not comply to the schema provided.
+  /{matchId}:
+       get:
+          description:
+            Allows match details for a match id
+          body:
+            application/json:
+            # schema: !include schemas/json/Notification.json
+          responses:
+            201:
+              body:
+                application/json:
+                  schema: !include schemas/json/GenericResponse.json
+            400:
+              description:
+                The payload was badly formed or does not comply to the schema provided.
+       /score:
+         get:
+            description:
+              Retrieves live score for a match
+            body:
+              application/json:
+              # schema: !include schemas/json/Notification.json
+            responses:
+              201:
+                body:
+                  application/json:
+                    schema: !include schemas/json/GenericResponse.json
+              400:
+                description:
+                  The payload was badly formed or does not comply to the schema provided.
+       /pbp:
+          get:
+              description:
+                Retrieves play by play for a match
+              body:
+                application/json:
+                # schema: !include schemas/json/Notification.json
+              responses:
+                201:
+                  body:
+                    application/json:
+                      schema: !include schemas/json/GenericResponse.json
+                400:
+                  description:
+                    The payload was badly formed or does not comply to the schema provided.
+                  
+        
+       

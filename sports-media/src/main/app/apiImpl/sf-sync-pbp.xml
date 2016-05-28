@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd">
+    <sub-flow name="sf_sync_pbp">
+        <json:json-to-object-transformer returnClass="java.util.HashMap" doc:name="JSON to Object"/>
+        <db:insert config-ref="MySQL_Configuration" doc:name="Database">
+            <db:parameterized-query><![CDATA[INSERT INTO `sports_media`.`sm_pbp` (
+  `match_id`,
+  `pbp_id`,
+  `comment`,
+  `date_created`,
+  `date_modified`
+) 
+VALUES
+  (
+    #[payload.matchId],
+    #[payload.pbpId],
+    #[payload.comment],
+    NOW(),
+    NOW()
+  ) ON DUPLICATE KEY UPDATE
+  
+  `comment` = #[payload.comment],
+  `date_modified` = NOW()]]></db:parameterized-query>
+        </db:insert>
+    </sub-flow>
+</mule>

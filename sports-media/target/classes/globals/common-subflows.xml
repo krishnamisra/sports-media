@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.7.1"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd">
+
+
+    <sub-flow name="sf_common-modules_processError">
+          <logger message="#[flowVars.logprefix]: Error Occured: #[exception.getCauseException().getMessage()]" level="ERROR" doc:name="Log - Error"/>
+        <expression-component doc:name="Expression - Check Error Variables Populated"><![CDATA[if (flowVars.errorMessage == null) {
+  flowVars.errorMessage = 'Internal Server Error';
+}
+if (flowVars.logprefix == null) {
+    flowVars.logprefix = message.id;
+}
+if (flowVars.errorAdditionalDetails == null) {
+    flowVars.errorAdditionalDetails = '';
+}
+if (flowVars.httpReason == null) {
+    flowVars.httpReason = 'Internal Server Error';
+}]]></expression-component>
+        <dw:transform-message doc:name="Create the Canonical JSON Response for Errors">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+	"status": "ERROR",
+    "message": flowVars.errorMessage,
+    "correlationId": flowVars.logprefix,
+    "additionalDetails": flowVars.errorAdditionalDetails
+    
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <byte-array-to-string-transformer doc:name="Byte Array to String"/>
+        <logger message="#[flowVars.logprefix]: Response Payload: #[payload]" level="INFO" doc:name="Log - Response Payload"/>
+        <message-properties-transformer overwrite="true" doc:name="Message Properties - Set Output Headers">
+            <add-message-property key="Content-Type" value="application/json"/>
+        </message-properties-transformer>
+    </sub-flow>
+    <choice-exception-strategy name="common-APIFlowLevel_Exception_Strategy">
+      <catch-exception-strategy  doc:name="Catch Flow Level Runtime Exceptions">
+            <expression-component doc:name="Set Error Variables"><![CDATA[flowVars.errorMessage = 'Internal Server Error';
+flowVars.errorAdditionalDetails= exception.getCauseException().getMessage();
+flowVars.httpReason='Internal Server Error';
+]]></expression-component>
+            <flow-ref name="sf_common-modules_processError" doc:name="Send Error Response" />
+            <message-properties-transformer overwrite="true" doc:name="Set the HTTP Status to 500">
+                <add-message-property key="http.status" value="500"/>
+            </message-properties-transformer>
+      
+      </catch-exception-strategy>    
+    </choice-exception-strategy>
+
+
+    <choice-exception-strategy name="common-Queue-Exception-Handling">
+            <catch-exception-strategy when="#[exception.causeMatches('org.mule.module.json.validation.JsonSchemaValidationException')]" doc:name="Catch Business Exceptions">
+                 <logger message="#[flowVars.logprefix]: Business Error Occurred: #[exception.getCauseException().getMessage()]" level="ERROR" doc:name="Log - Business Error"/>
+                <logger message="#[flowVars.logprefix]: Place Message on Poison Q??" level="INFO" doc:name="Log - Place the Message on the Poison Q"/>
+                <logger message="#[flowVars.logprefix]: Incoming (Invalid) Payload: #[flowVars.originalPayload]" level="INFO" doc:name="Log - Invalid Payload"/>
+
+            </catch-exception-strategy>
+            <catch-exception-strategy when="#[message.inboundProperties['JMSXDeliveryCount'] &gt; 4]" doc:name="Catch Technical Exception and Override DLQ processing">
+                 <logger message="#[flowVars.logprefix]: Technical Error (Override DLQ) Occurred: #[exception.getCauseException().getMessage()]" level="ERROR" doc:name="Log - Technical Error"/>
+            <logger message="#[flowVars.logprefix]:  Redelivery Count: #[message.inboundProperties['JMSXDeliveryCount']] - Overriding the DLQ Processing" level="INFO" doc:name="Log - Current Redelivery Count"/>
+            <set-payload value="#[flowVars.originalPayload]" doc:name="Set Payload"/>
+           <!--  <jms:outbound-endpoint queue="${jms.destination.notification.dlq}" connector-ref="Global_Active_MQ" doc:name="Place Original Message on the Deal Letter Q"/> -->
+            </catch-exception-strategy>
+            <rollback-exception-strategy doc:name="Rollback - Catch Technical Exceptons (Redelivery Policy)">
+                  <logger message="#[flowVars.logprefix]:- #[exception.getCauseException().getMessage()]. Message Rolledback on Queue" level="WARN" doc:name="Rollback transaction"/>
+                 <logger message="#[flowVars.logprefix]:  Redelivery Count: #[message.inboundProperties['JMSXDeliveryCount']]" level="INFO" doc:name="Log - Redelivery Count"/>
+            <on-redelivery-attempts-exceeded>
+                <logger level="INFO" doc:name="Log - Flow Variables are lost at this stage - Not good to be here"/>
+            </on-redelivery-attempts-exceeded>
+            </rollback-exception-strategy>
+    </choice-exception-strategy>
+
+
+
+</mule>

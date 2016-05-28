@@ -1,0 +1,5 @@
+{
+  "priority" : "ERROR",
+  "domain" : "test-app",
+  "message" : "This is a test message"
+}

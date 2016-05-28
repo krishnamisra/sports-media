@@ -1,0 +1,24 @@
+<!-- <?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.7.3"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+    <flow name="main_jmsNotification" initialState="stopped">
+        <jms:inbound-endpoint queue="${jms.destination.notification.q}"  doc:name="JMS - Receive JSON Notificaton Request" connector-ref="Global_Active_MQ">
+            <jms:transaction action="ALWAYS_BEGIN"/>
+        </jms:inbound-endpoint>
+        <expression-component doc:name="Set Log Prefix and Store Original Payload"><![CDATA[flowVars.logprefix = message.id +'-Q';
+flowVars.originalPayload = payload;]]></expression-component>
+        <logger message="#[flowVars.logprefix]: Received Notification Request" level="INFO" doc:name="Log - Received Notification Request"/>
+        <json:validate-schema schemaLocation="schemas/json/Notification.json" doc:name="Validate JSON Payload Against Schema"/>
+        <flow-ref name="sf-common-sendEmail" doc:name="Process Notification Request - Email Alert"/>
+        <logger message="#[flowVars.logprefix]: Q Notification Request Processing Completed" level="INFO" doc:name="Log - Queue Processing Completed"/>
+        <exception-strategy ref="common-Queue-Exception-Handling" doc:name="Common Queue Exception Handling"/>
+    </flow>
+</mule> -->

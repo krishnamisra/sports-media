@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd">
+    <sub-flow name="sf_sync_score">
+        <json:json-to-object-transformer returnClass="java.util.HashMap" doc:name="JSON to Object"/>
+        <db:insert config-ref="MySQL_Configuration" doc:name="Database">
+            <db:parameterized-query><![CDATA[INSERT INTO `sports_media`.`sm_score` (
+  `match_id`,
+  `home_team_id`,
+  `away_team_id`,
+  `home_team_score`,
+  `away_team_score`,
+  `date_created`,
+  `date_modified`
+) 
+VALUES
+  (
+    #[payload.matchId],
+    #[payload.homeTeamId],
+    #[payload.awayTeamId],
+    #[payload.homeTeamScore],
+    #[payload.awayTeamScore],
+    NOW(),
+    NOW()
+  )  ON DUPLICATE KEY UPDATE
+  
+  `home_team_score` = #[payload.homeTeamScore],
+  `away_team_score` = #[payload.awayTeamScore],
+  `date_modified` = NOW()]]></db:parameterized-query>
+        </db:insert>
+    </sub-flow>
+</mule>

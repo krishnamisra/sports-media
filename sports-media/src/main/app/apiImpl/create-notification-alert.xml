@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting" xmlns:smtp="http://www.mulesoft.org/schema/mule/smtp" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/smtp http://www.mulesoft.org/schema/mule/smtp/current/mule-smtp.xsd
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd">
+   
+    <sub-flow name="sf_API_post_notification">
+        <logger level="INFO" doc:name="Log - Processing the Notification Request" message="#[flowVars.logprefix]: Processing the Notification Request"/>
+        <flow-ref name="sf-common-sendEmail" doc:name="Send Email"/>
+        <dw:transform-message doc:name="Create the Canonical JSON Response">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+	"status": "INFO",
+    "message": "Notification Request Processed Successfully",
+    "correlationId": flowVars.logprefix,
+    "additionalDetails": ""
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <logger message="#[flowVars.logprefix]: Notification Request Processed Successfully" level="INFO" doc:name="Log - Processing Completed"/>
+    </sub-flow>
+    <sub-flow name="sf-common-sendEmail">
+        <json:json-to-object-transformer returnClass="java.util.HashMap" doc:name="JSON to Object - Convert JSON Request to Map"/>
+        <scripting:component doc:name="Set the Email Parameters from the Incoming Request">
+            <scripting:script engine="Groovy"><![CDATA[String emailBody = payload.get("message");
+flowVars.emailSubject = payload.get("domain") + " - " + payload.get("priority");
+payload = emailBody;
+return payload;
+]]></scripting:script>
+        </scripting:component>        
+        <logger message="Test Test" level="INFO" doc:name="Logger"/>
+         <smtp:outbound-endpoint host="${smtp.server.host}"    to="${smtp.email.to}" from="${smtp.email.from}" subject="#[flowVars.emailSubject]" responseTimeout="10000" doc:name="SMTP - Send Alert based on Notification Request" >
+            <reconnect frequency="10000"/>
+        </smtp:outbound-endpoint>
+    </sub-flow>
+</mule>

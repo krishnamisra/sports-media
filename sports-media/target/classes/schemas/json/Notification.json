@@ -1,0 +1,19 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "NotificationRequest",
+    "description": "Request to create a Notification and Alert",
+    "type": "object",
+    "properties": {
+        "priority": {
+            "type": "string",
+            "enum": [ "INFO", "WARN", "ERROR" ]
+        },
+        "message": {
+            "type": "string"
+        },
+        "domain": {
+            "type": "string"
+        }
+    },
+    "required": ["priority", "message", "domain"]
+}

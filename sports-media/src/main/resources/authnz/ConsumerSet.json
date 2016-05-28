@@ -1,0 +1,12 @@
+{
+  "consumerSetID":"NOTIFICATION-SET",
+  "consumers": [
+    { "username":"sports",
+      "password":"64qWbo6LMwTQAV/02PV/wg==",
+      "authURIs" : [
+        "^.*$"
+      ]
+    }
+    
+  ]
+}

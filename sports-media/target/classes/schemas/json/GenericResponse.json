@@ -1,0 +1,22 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "GenericResponse",
+    "description": "Response for all seasons",
+    "type": "object",
+    "properties": {
+        "status": {
+            "type": "string",
+            "enum": [ "INFO", "WARN", "ERROR" ]
+        },
+        "message": {
+            "type": "string"
+        },
+        "correlationId": {
+            "type": "string"
+        },
+        "additionalDetails": {
+            "type": "string"
+        }
+    },
+    "required": ["status", "message", "correlationId"]
+}

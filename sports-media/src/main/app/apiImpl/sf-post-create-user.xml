@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd">
+    <db:mysql-config name="MySQL_Configuration" host="localhost" port="3306" user="root" password="krishna123" database="sports_media" doc:name="MySQL Configuration"/>
+    <sub-flow name="sf_post_create_user">
+        <logger message="User Creation Requested" level="INFO" doc:name="User Creation Requested"/>
+        <json:json-to-object-transformer returnClass="java.util.HashMap" doc:name="JSON to Object"/>
+        <db:insert config-ref="MySQL_Configuration" doc:name="Create User">
+            <db:parameterized-query><![CDATA[INSERT INTO `sports_media`.`sm_user` (
+  `first_name`,
+  `last_name`,
+  `date_created`,
+  `date_modified`
+) 
+VALUES
+  (
+    #[payload.firstName],
+    #[payload.lastName],
+    NOW(),
+    NOW()
+  )]]></db:parameterized-query>
+        </db:insert>
+        <logger message="User Creation Completed" level="INFO" doc:name="User Creation Completed"/>
+    </sub-flow>
+</mule>
